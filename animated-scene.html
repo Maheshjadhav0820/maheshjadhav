@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Animated Scene â€” Iron Man &amp; Friends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a12;overflow:hidden;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;width:100vw}
+#scene{position:fixed;top:0;left:0;width:100vw;height:100vh}
+.hud{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10;color:rgba(255,255,255,0.3);font-size:0.65rem;letter-spacing:4px;text-transform:uppercase;text-align:center;pointer-events:none;animation:hudFade 3s ease-in-out infinite}
+@keyframes hudFade{0%,100%{opacity:0.3}50%{opacity:0.8}}
+.hud span{color:#ff3366}
+.title{position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:10;color:#fff;font-size:clamp(0.9rem,2vw,1.4rem);letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 30px rgba(255,51,102,0.3);pointer-events:none;opacity:0.6}
+</style>
+</head>
+<body>
+<div class="title">âš¡ Cosmic<span style="color:#ff3366">//</span>Showdown</div>
+<canvas id="scene"></canvas>
+<div class="hud"><span>âœ¦</span> Auto-Play Animation <span>âœ¦</span></div>
+<script>
+const c=document.getElementById('scene'),x=c.getContext('2d');
+let w,h,t=0;
+function resize(){w=c.width=c.offsetWidth;h=c.height=c.offsetHeight}
+window.addEventListener('resize',resize);resize();
+
+// Stars bg
+let stars=[];
+for(let i=0;i<200;i++){stars.push({x:Math.random()*w,y:Math.random()*h,s:Math.random()*1.5+0.5,o:Math.random()*0.5+0.3})}
+
+// Buildings
+let buildings=[];
+function genBuildings(){
+buildings=[];
+const count=30+Math.floor(Math.random()*20);
+for(let i=0;i<count;i++){
+const bw=30+Math.random()*60;
+const bh=80+Math.random()*300;
+buildings.push({x:(w/count)*i*1.2,bw,bh,win:Array.from({length:Math.floor(bh/30)},()=>Math.random()>0.5)})
+}
+}
+genBuildings();
+
+// Particles
+let particles=[];
+
+function addParticles(x,y,count,color,speed,life){
+for(let i=0;i<count;i++){
+particles.push({
+x,y,
+vx:(Math.random()-0.5)*speed,
+vy:(Math.random()-0.5)*speed,
+life:life||60+Math.random()*40,
+maxLife:life||60+Math.random()*40,
+size:Math.random()*3+1,
+color:color||'#ff6633'
+})
+}
+}
+
+// Iron Man arc reactor glow
+function drawIronMan(px,py,size,angle){
+x.save();x.translate(px,py);x.rotate(angle);
+// Body
+const g=x.createRadialGradient(0,0,2,0,0,size);
+g.addColorStop(0,'#ff3333');g.addColorStop(0.3,'#cc2200');g.addColorStop(0.7,'#881100');g.addColorStop(1,'#220000');
+x.fillStyle='rgba(200,0,0,0.9)';
+x.beginPath();x.ellipse(0,0,size*0.8,size*1.2,0,0,Math.PI*2);x.fill();
+// Arc reactor
+const r=x.createRadialGradient(0,size*0.2,0,0,size*0.2,size*0.35);
+r.addColorStop(0,'#ffffff');r.addColorStop(0.2,'#aaffff');r.addColorStop(0.6,'#00aaff');r.addColorStop(1,'#003366');
+x.fillStyle=r;
+x.beginPath();x.arc(0,size*0.2,size*0.35,0,Math.PI*2);x.fill();
+// Glow
+x.shadowColor='#00aaff';x.shadowBlur=size*0.8;
+x.fillStyle='rgba(0,170,255,0.2)';
+x.beginPath();x.arc(0,size*0.2,size*0.5,0,Math.PI*2);x.fill();
+x.shadowBlur=0;
+// Eyes
+x.fillStyle='#00ffff';
+x.shadowColor='#00ffff';x.shadowBlur=10;
+x.fillRect(-size*0.25,-size*0.45,size*0.12,size*0.08);
+x.fillRect(size*0.13,-size*0.45,size*0.12,size*0.08);
+x.shadowBlur=0;
+// Hands - repulsor glow
+const hr=x.createRadialGradient(-size*0.8,0,0,-size*0.8,0,size*0.3);
+hr.addColorStop(0,'rgba(255,255,255,0.9)');hr.addColorStop(0.5,'rgba(0,200,255,0.5)');hr.addColorStop(1,'rgba(0,200,255,0)');
+x.fillStyle=hr;x.beginPath();x.arc(-size*0.8,0,size*0.3,0,Math.PI*2);x.fill();
+const hr2=x.createRadialGradient(size*0.8,0,0,size*0.8,0,size*0.3);
+hr2.addColorStop(0,'rgba(255,255,255,0.9)');hr2.addColorStop(0.5,'rgba(0,200,255,0.5)');hr2.addColorStop(1,'rgba(0,200,255,0)');
+x.fillStyle=hr2;x.beginPath();x.arc(size*0.8,0,size*0.3,0,Math.PI*2);x.fill();
+// Feet - thrusters
+const ft=x.createRadialGradient(0,size*1.1,0,0,size*1.1,size*0.4);
+ft.addColorStop(0,'rgba(255,255,200,0.8)');ft.addColorStop(0.3,'rgba(255,200,0,0.5)');ft.addColorStop(1,'rgba(255,100,0,0)');
+x.fillStyle=ft;x.beginPath();x.ellipse(0,size*1.1,size*0.25,size*0.4,0,0,Math.PI*2);x.fill();
+x.restore();
+}
+
+// Female character (dancer/celebrity inspired)
+function drawDancer(px,py,size){
+x.save();x.translate(px,py);
+const bounce=Math.sin(t*0.003)*size*0.15;
+// Hair
+x.fillStyle='#1a0a1a';
+x.beginPath();x.ellipse(0,-size*0.8+bounce,size*0.6,size*0.5,0,0,Math.PI*2);x.fill();
+// Hair flow
+x.fillStyle='#2a102a';
+x.beginPath();x.ellipse(-size*0.5,-size*0.6+bounce,size*0.25,size*0.4,0.3,0,Math.PI*2);x.fill();
+x.beginPath();x.ellipse(size*0.5,-size*0.6+bounce,size*0.25,size*0.4,-0.3,0,Math.PI*2);x.fill();
+// Head
+const hg=x.createRadialGradient(0,-size*0.7+bounce,2,0,-size*0.7+bounce,size*0.35);
+hg.addColorStop(0,'#f5d6c6');hg.addColorStop(0.7,'#e8c4a8');hg.addColorStop(1,'#d4a88a');
+x.fillStyle=hg;
+x.beginPath();x.arc(0,-size*0.7+bounce,size*0.35,0,Math.PI*2);x.fill();
+// Eyes
+x.fillStyle='#2a1a1a';
+x.beginPath();x.arc(-size*0.12,-size*0.75+bounce,size*0.05,0,Math.PI*2);x.fill();
+x.beginPath();x.arc(size*0.12,-size*0.75+bounce,size*0.05,0,Math.PI*2);x.fill();
+// Eye shine
+x.fillStyle='#fff';
+x.beginPath();x.arc(-size*0.09,-size*0.77+bounce,size*0.02,0,Math.PI*2);x.fill();
+x.beginPath();x.arc(size*0.15,-size*0.77+bounce,size*0.02,0,Math.PI*2);x.fill();
+// Lips
+x.fillStyle='#cc4466';
+x.beginPath();x.ellipse(0,-size*0.62+bounce,size*0.1,size*0.04,0,0,Math.PI*2);x.fill();
+// Body - dress
+const db=Math.sin(t*0.004)*size*0.1;
+const dg=x.createLinearGradient(0,-size*0.35,0,size*0.8);
+dg.addColorStop(0,'#ff3366');dg.addColorStop(0.5,'#cc0044');dg.addColorStop(1,'#880033');
+x.fillStyle=dg;
+x.beginPath();x.moveTo(-size*0.3,-size*0.35+db);x.quadraticCurveTo(0,size*0.1+db,size*0.3,-size*0.35+db);
+x.quadraticCurveTo(size*0.4,size*0.7+db,0,size*1.0+db);
+x.quadraticCurveTo(-size*0.4,size*0.7+db,-size*0.3,-size*0.35+db);x.fill();
+// Dress sparkle
+if(Math.random()>0.97){
+x.fillStyle='rgba(255,255,255,0.8)';
+x.shadowColor='#ff3366';x.shadowBlur=15;
+x.beginPath();x.arc(Math.random()*size*0.6-size*0.3,Math.random()*size*0.8,2,0,Math.PI*2);x.fill();
+x.shadowBlur=0;
+}
+// Glow aura
+const ag=x.createRadialGradient(0,size*0.2,0,0,size*0.2,size*1.2);
+ag.addColorStop(0,'rgba(255,51,102,0.15)');ag.addColorStop(1,'rgba(255,51,102,0)');
+x.fillStyle=ag;
+x.beginPath();x.arc(0,size*0.2,size*1.2,0,Math.PI*2);x.fill();
+x.restore();
+}
+
+// Batman/shadow character
+function drawShadowHero(px,py,size){
+x.save();x.translate(px,py);
+const wb=Math.sin(t*0.002)*size*0.08;
+// Cape
+x.fillStyle='#111';
+x.beginPath();x.moveTo(-size*0.5,-size*0.4+wb);
+x.quadraticCurveTo(-size*0.8,size*0.2+wb,0,size*0.8+wb);
+x.quadraticCurveTo(size*0.8,size*0.2+wb,size*0.5,-size*0.4+wb);
+x.fill();
+// Body
+x.fillStyle='#1a1a1a';
+x.beginPath();x.ellipse(0,0,size*0.4,size*0.6,0,0,Math.PI*2);x.fill();
+// Head
+x.fillStyle='#222';
+x.beginPath();x.arc(0,-size*0.55+wb,size*0.3,0,Math.PI*2);x.fill();
+// Ears
+x.beginPath();x.moveTo(-size*0.25,-size*0.75+wb);x.lineTo(-size*0.15,-size*1.0+wb);x.lineTo(-size*0.05,-size*0.75+wb);x.fill();
+x.beginPath();x.moveTo(size*0.25,-size*0.75+wb);x.lineTo(size*0.15,-size*1.0+wb);x.lineTo(size*0.05,-size*0.75+wb);x.fill();
+// Eyes (white glow)
+x.fillStyle='rgba(255,255,255,0.1)';
+x.beginPath();x.ellipse(-size*0.1,-size*0.58+wb,size*0.08,size*0.03,0,0,Math.PI*2);x.fill();
+x.beginPath();x.ellipse(size*0.1,-size*0.58+wb,size*0.08,size*0.03,0,0,Math.PI*2);x.fill();
+// Belt
+x.fillStyle='#333';x.fillRect(-size*0.35,size*0.1,size*0.7,size*0.06);
+x.restore();
+}
+
+// Starship/spider character
+function drawMysteryHero(px,py,size){
+x.save();x.translate(px,py);
+const sb=Math.sin(t*0.005)*size*0.12;
+// Web strings
+x.strokeStyle='rgba(255,255,255,0.1)';
+x.lineWidth=0.5;
+for(let i=0;i<6;i++){
+const a=i*1.047+sb;
+x.beginPath();x.moveTo(0,-size*0.3+sb);x.lineTo(Math.cos(a)*size*1.5,Math.sin(a)*size*1.5);x.stroke();
+}
+// Body
+const sg=x.createRadialGradient(0,-size*0.2+sb,0,0,-size*0.2+sb,size*0.5);
+sg.addColorStop(0,'#cc2222');sg.addColorStop(0.6,'#881111');sg.addColorStop(1,'#440000');
+x.fillStyle=sg;
+x.beginPath();x.ellipse(0,-size*0.2+sb,size*0.4,size*0.5,0,0,Math.PI*2);x.fill();
+// Head
+x.fillStyle='#aa1111';
+x.beginPath();x.arc(0,-size*0.6+sb,size*0.25,0,Math.PI*2);x.fill();
+// Eyes
+x.fillStyle='#fff';
+x.shadowColor='#fff';x.shadowBlur=8;
+x.beginPath();x.ellipse(-size*0.1,-size*0.63+sb,size*0.08,size*0.04,0,0,Math.PI*2);x.fill();
+x.beginPath();x.ellipse(size*0.1,-size*0.63+sb,size*0.08,size*0.04,0,0,Math.PI*2);x.fill();
+x.shadowBlur=0;
+x.fillStyle='#111';
+x.beginPath();x.ellipse(-size*0.08,-size*0.63+sb,size*0.03,size*0.04,0,0,Math.PI*2);x.fill();
+x.beginPath();x.ellipse(size*0.12,-size*0.63+sb,size*0.03,size*0.04,0,0,Math.PI*2);x.fill();
+x.restore();
+}
+
+// Explosion effect
+function drawExplosion(cx,cy,r,phase){
+const e=x.createRadialGradient(cx,cy,0,cx,cy,r);
+e.addColorStop(0,'rgba(255,255,200,0.9)');e.addColorStop(0.3,'rgba(255,200,50,0.7)');
+e.addColorStop(0.6,'rgba(255,100,0,0.4)');e.addColorStop(1,'rgba(255,0,0,0)');
+x.fillStyle=e;
+x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fill();
+// Sparks
+for(let i=0;i<8;i++){
+const a=i*0.785+phase,mag=r*(0.5+Math.random()*0.5);
+const sx=cx+Math.cos(a)*mag,sy=cy+Math.sin(a)*mag;
+x.strokeStyle='rgba(255,200,100,'+(0.3+Math.random()*0.3)+')';
+x.lineWidth=1+Math.random()*2;
+x.beginPath();x.moveTo(cx,cy);x.lineTo(sx,sy);x.stroke();
+}
+}
+
+// City glow
+function drawCity(){
+buildings.forEach(b=>{
+// Building body
+const bg=x.createLinearGradient(b.x,0,b.x,1);
+bg.addColorStop(0,'rgba(20,20,40,0.8)');bg.addColorStop(1,'rgba(10,10,20,0.9)');
+x.fillStyle=bg;
+x.fillRect(b.x,h-b.bh,b.bw,b.bh);
+// Outline
+x.strokeStyle='rgba(100,100,200,0.08)';x.lineWidth=1;x.strokeRect(b.x,h-b.bh,b.bw,b.bh);
+// Windows
+b.win.forEach((on,wi)=>{
+if(on){
+const wx=b.x+5+Math.random()*(b.bw-10)*0.8;
+const wy=h-b.bh+5+wi*30+Math.random()*10;
+const winOn=Math.sin(t*0.002+wx*wy*0.01)>0.2;
+if(winOn){
+const wg=Math.random()>0.9?'#ff6644':'#ffeeaa';
+x.fillStyle=wg;
+x.shadowColor=wg;x.shadowBlur=6;
+x.fillRect(wx,wy,4+Math.random()*6,4+Math.random()*6);
+x.shadowBlur=0;
+}
+}
+});
+});
+// Ground glow
+const gg=x.createLinearGradient(0,h-5,0,h);
+gg.addColorStop(0,'rgba(50,30,80,0.2)');gg.addColorStop(1,'rgba(10,10,20,0.4)');
+x.fillStyle=gg;x.fillRect(0,h-5,w,5);
+}
+
+// Moon
+function drawMoon(){
+const m=x.createRadialGradient(w*0.82,h*0.12,0,w*0.82,h*0.12,50);
+m.addColorStop(0,'rgba(200,200,255,0.4)');m.addColorStop(0.5,'rgba(150,150,200,0.15)');m.addColorStop(1,'rgba(100,100,150,0)');
+x.fillStyle=m;x.beginPath();x.arc(w*0.82,h*0.12,50,0,Math.PI*2);x.fill();
+x.fillStyle='rgba(200,200,255,0.08)';x.beginPath();x.arc(w*0.82,h*0.12,30,0,Math.PI*2);x.fill();
+}
+
+// Draw character label
+function drawLabel(text,cx,cy){
+x.font='10px Orbitron';
+x.fillStyle='rgba(255,255,255,0.2)';x.textAlign='center';
+x.fillText(text,cx,cy+25);
+}
+
+let ironState={x:0,y:0,angle:0,phase:0};
+let dancerState={x:0,y:0,phase:0};
+let shadowState={x:0,y:0,phase:0};
+let spiderState={x:0,y:0,phase:0};
+
+function initPositions(){
+ironState={x:w*0.2,y:h*0.3,angle:0,phase:0};
+dancerState={x:w*0.5,y:h*0.55,phase:0};
+shadowState={x:w*0.75,y:h*0.4,phase:0};
+spiderState={x:w*0.35,y:h*0.2,phase:0};
+}
+initPositions();
+
+function updateScene(){
+t++;
+// Iron Man - figure 8 flight path
+const im=dancerState;
+ironState.x=w*0.3+Math.sin(t*0.008)*w*0.25;
+ironState.y=h*0.25+Math.cos(t*0.012)*h*0.12;
+ironState.angle=Math.sin(t*0.01)*0.2;
+if(Math.sin(t*0.008)>0.8&&t%5===0){
+addParticles(ironState.x,ironState.y,2,'rgba(255,200,100,0.6)',3,20);
+}
+// Add booster trail
+if(t%3===0){
+addParticles(ironState.x+Math.random()*8-4,ironState.y+15+Math.random()*10,1,'rgba(255,150,50,0.4)',2,15);
+}
+// Dancer - on ground, slight sway
+dancerState.x=w*0.5+Math.sin(t*0.003)*30;
+dancerState.y=h*0.62;
+// Shadow hero - rooftop patrol
+shadowState.x=w*0.7+Math.sin(t*0.005+1)*w*0.15;
+shadowState.y=h*0.3+Math.cos(t*0.007+1)*h*0.08;
+// Spider hero - web swinging
+spiderState.x=w*0.2+Math.sin(t*0.01+2)*w*0.3;
+spiderState.y=h*0.18+Math.abs(Math.sin(t*0.006+2))*h*0.3;
+// Random explosion
+if(t%120===0&&Math.random()>0.6){
+const ex=w*0.1+Math.random()*w*0.8;
+const ey=h*0.1+Math.random()*h*0.5;
+addParticles(ex,ey,30,'#ff6633',8,40);
+addParticles(ex,ey,20,'#ffcc00',6,30);
+}
+// Update particles
+particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;p.vx*=0.98;p.vy*=0.98;p.size*=0.99});
+particles=particles.filter(p=>p.life>0);
+}
+
+function drawScene(){
+x.fillStyle='rgba(10,10,18,0.3)';
+x.fillRect(0,0,w,h);
+// Stars
+stars.forEach(s=>{
+x.fillStyle='rgba(255,255,255,'+s.o+')';
+x.beginPath();x.arc(s.x,s.y,s.s,0,Math.PI*2);x.fill();
+// Twinkle
+if(Math.random()>0.995){
+x.fillStyle='rgba(200,200,255,'+(s.o*0.3)+')';
+x.beginPath();x.arc(s.x,s.y,s.s*3,0,Math.PI*2);x.fill();
+}
+});
+drawMoon();
+drawCity();
+// Explosions occasionally
+if(t%180===0){
+drawExplosion(w*0.15+Math.random()*w*0.7,h*0.2+Math.random()*h*0.5,60+Math.random()*40,t*0.1);
+}
+// Draw characters
+drawIronMan(ironState.x,ironState.y,20,ironState.angle);
+drawLabel('IRON MAN',ironState.x,ironState.y-30);
+drawDancer(dancerState.x,dancerState.y,35);
+drawLabel('â˜… MIA â˜…',dancerState.x,dancerState.y-45);
+drawShadowHero(shadowState.x,shadowState.y,22);
+drawLabel('BATMAN',shadowState.x,shadowState.y-35);
+drawMysteryHero(spiderState.x,spiderState.y,18);
+drawLabel('SPIDER-MAN',spiderState.x,spiderState.y-30);
+// Particles
+particles.forEach(p=>{
+const pg=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size);
+pg.addColorStop(0,'rgba(255,255,200,'+(p.life/p.maxLife*0.8)+')');
+pg.addColorStop(0.5,'rgba(255,150,50,'+(p.life/p.maxLife*0.5)+')');
+pg.addColorStop(1,'rgba(255,50,0,0)');
+x.fillStyle=pg;
+x.beginPath();x.arc(p.x,p.y,Math.max(0.5,p.size*(p.life/p.maxLife)),0,Math.PI*2);x.fill();
+});
+// Scanning line effect
+if(t%2===0){
+const sl=(t%200)/200;
+x.fillStyle='rgba(0,200,255,0.015)';x.fillRect(0,sl*h,w,2);
+}
+// Vignette
+const vg=x.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
+vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(0.7,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.5)');
+x.fillStyle=vg;x.fillRect(0,0,w,h);
+}
+
+function frame(){
+updateScene();
+drawScene();
+requestAnimationFrame(frame);
+}
+frame();
+
+// Resize handler
+window.addEventListener('resize',()=>{
+resize();
+stars=[];
+for(let i=0;i<200;i++){stars.push({x:Math.random()*w,y:Math.random()*h,s:Math.random()*1.5+0.5,o:Math.random()*0.5+0.3})}
+genBuildings();
+initPositions();
+});
+</script>
+</body>
+</html>

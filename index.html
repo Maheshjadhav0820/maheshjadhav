@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ALPHA ESPORTS - Dominate The Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--card-bg:rgba(20,20,20,0.75);--neon:#b44eff;--neon2:#8b2fc9;--neon3:#e0b0ff;--neon-glow:rgba(180,78,255,0.4);--text:#ffffff;--text2:#a0a0a0;--border:rgba(180,78,255,0.15);--radius:16px;--transition:0.4s cubic-bezier(0.25,0.46,0.45,0.94)}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4,h5,h6{font-family:'Orbitron',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.02em}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+
+::selection{background:var(--neon);color:#000}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--neon2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--neon)}
+
+.neon-text{color:var(--neon);text-shadow:0 0 10px var(--neon-glow),0 0 40px var(--neon-glow),0 0 80px rgba(180,78,255,0.2)}
+.glow{box-shadow:0 0 20px var(--neon-glow),0 0 60px rgba(180,78,255,0.1)}
+.glass{background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius)}
+.section-title{font-size:clamp(1.8rem,4vw,3rem);text-align:center;margin-bottom:12px}
+.section-sub{text-align:center;color:var(--text2);margin-bottom:60px;font-size:1.1rem}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:1000;padding:0 5%;height:80px;display:flex;align-items:center;justify-content:space-between;transition:var(--transition);background:transparent}
+nav.scrolled{background:rgba(10,10,10,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;letter-spacing:3px}
+.nav-logo span{color:var(--neon)}
+.nav-links{display:flex;gap:32px;list-style:none;font-size:0.85rem;font-weight:500;letter-spacing:1px}
+.nav-links a{position:relative;padding:4px 0;transition:var(--transition)}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--neon);transition:var(--transition);box-shadow:0 0 10px var(--neon-glow)}
+.nav-links a:hover::after{width:100%}
+.nav-links a:hover{color:var(--neon)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:5px}
+.nav-toggle span{width:28px;height:2px;background:var(--text);transition:var(--transition);border-radius:2px}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#particle-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0}
+.hero-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,transparent 0%,var(--bg) 80%);z-index:1}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 5%;max-width:900px}
+.hero-badge{display:inline-block;padding:8px 24px;border:1px solid var(--neon);border-radius:50px;font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;color:var(--neon);box-shadow:0 0 20px rgba(180,78,255,0.15)}
+.hero-title{font-size:clamp(2.5rem,8vw,6rem);line-height:1;margin-bottom:20px}
+.hero-title .line{display:block}
+.hero-title .line:last-child{background:linear-gradient(135deg,var(--neon),var(--neon3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(1rem,2vw,1.3rem);color:var(--text2);max-width:600px;margin:0 auto 40px;line-height:1.8}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 36px;border-radius:50px;font-family:'Orbitron',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:var(--transition);border:none;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--neon2),var(--neon));color:#000;box-shadow:0 0 30px rgba(180,78,255,0.3)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(180,78,255,0.5)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--neon);color:#000;border-color:var(--neon);box-shadow:0 0 30px rgba(180,78,255,0.3)}
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text2);font-size:0.7rem;letter-spacing:2px;text-transform:uppercase}
+.hero-scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--neon),transparent);animation:scrollPulse 2s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+/* STATS */
+.stats{position:relative;z-index:2;margin-top:-80px;padding:0 5% 80px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-card{padding:32px 20px;text-align:center;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--neon),transparent)}
+.stat-number{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;color:var(--neon);display:block;margin-bottom:4px;text-shadow:0 0 20px var(--neon-glow)}
+.stat-label{color:var(--text2);font-size:0.85rem;letter-spacing:1px;text-transform:uppercase}
+.stat-plus{color:var(--neon);font-size:clamp(1rem,2vw,1.8rem)}
+
+/* ROSTER */
+.roster{padding:100px 5%;background:var(--bg2);position:relative}
+.roster-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:1200px;margin:0 auto}
+.roster-card{perspective:1000px;height:400px;cursor:pointer}
+.roster-card-inner{position:relative;width:100%;height:100%;transition:transform 0.6s cubic-bezier(0.23,1,0.32,1);transform-style:preserve-3d;border-radius:var(--radius);overflow:hidden}
+.roster-card:hover .roster-card-inner{transform:rotateY(12deg) rotateX(6deg)}
+.roster-card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:var(--radius);padding:32px 24px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border:1px solid var(--border)}
+.roster-card-face::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.2) 60%,transparent 100%);z-index:0}
+.roster-card-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1}
+.roster-card-face>*{position:relative;z-index:1}
+.roster-role{font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--neon);margin-bottom:6px;text-shadow:0 0 10px var(--neon-glow)}
+.roster-name{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700}
+.roster-desc{font-size:0.85rem;color:var(--text2);margin-top:4px}
+.roster-tag{position:absolute;top:16px;right:16px;padding:4px 12px;border:1px solid var(--neon);border-radius:4px;font-size:0.6rem;letter-spacing:2px;z-index:2;color:var(--neon);text-shadow:0 0 10px var(--neon-glow)}
+
+/* TIMELINE */
+.timeline{padding:100px 5%;position:relative}
+.timeline-container{position:relative;max-width:900px;margin:0 auto}
+.timeline-container::before{content:'';position:absolute;left:50%;top:0;transform:translateX(-50%);width:2px;height:100%;background:linear-gradient(to bottom,transparent,var(--neon),transparent)}
+.timeline-item{position:relative;padding:32px 0;display:flex;justify-content:flex-start;width:100%}
+.timeline-item:nth-child(even){justify-content:flex-end}
+.timeline-item-content{width:44%;padding:28px;position:relative}
+.timeline-item-content::before{content:'';position:absolute;top:38px;width:16px;height:16px;background:var(--neon);border-radius:50%;box-shadow:0 0 20px var(--neon-glow),0 0 60px rgba(180,78,255,0.2);z-index:2}
+.timeline-item:nth-child(odd) .timeline-item-content::before{right:-58px}
+.timeline-item:nth-child(even) .timeline-item-content::before{left:-58px}
+.timeline-date{font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--neon);margin-bottom:8px;letter-spacing:1px}
+.timeline-title{font-family:'Orbitron',sans-serif;font-size:1.1rem;margin-bottom:6px}
+.timeline-desc{font-size:0.9rem;color:var(--text2)}
+
+/* ACHIEVEMENTS */
+.achievements{padding:100px 5%;background:var(--bg2);position:relative}
+.achievements-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1100px;margin:0 auto}
+.achievement-card{padding:36px 28px;text-align:center;position:relative;overflow:hidden;transition:var(--transition)}
+.achievement-card:hover{transform:translateY(-8px);border-color:var(--neon);box-shadow:0 10px 40px rgba(180,78,255,0.15)}
+.achievement-icon{font-size:2.5rem;margin-bottom:16px}
+.achievement-title{font-family:'Orbitron',sans-serif;font-size:1rem;margin-bottom:8px;letter-spacing:1px}
+.achievement-desc{font-size:0.85rem;color:var(--text2);line-height:1.7}
+.achievement-glow{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at center,var(--neon-glow),transparent 60%);opacity:0;transition:var(--transition);pointer-events:none}
+.achievement-card:hover .achievement-glow{opacity:0.1}
+
+/* GALLERY */
+.gallery{padding:100px 5%;position:relative}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+.gallery-item{position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;aspect-ratio:16/10;border:1px solid var(--border);transition:var(--transition)}
+.gallery-item:hover{transform:scale(1.02);border-color:var(--neon);box-shadow:0 10px 40px rgba(180,78,255,0.2)}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:var(--transition)}
+.gallery-item:hover img{transform:scale(1.1)}
+.gallery-overlay{position:absolute;bottom:0;left:0;width:100%;padding:20px;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);opacity:0;transition:var(--transition)}
+.gallery-item:hover .gallery-overlay{opacity:1}
+.gallery-overlay span{font-family:'Orbitron',sans-serif;font-size:0.8rem;letter-spacing:1px}
+
+/* SPONSORS */
+.sponsors{padding:100px 5%;background:var(--bg2);position:relative;overflow:hidden}
+.sponsors-track{display:flex;gap:60px;animation:sponsorScroll 30s linear infinite;width:max-content}
+.sponsors-track:hover{animation-play-state:paused}
+.sponsor-item{height:60px;display:flex;align-items:center;padding:0 20px;opacity:0.4;transition:var(--transition);filter:grayscale(1)}
+.sponsor-item:hover{opacity:1;filter:grayscale(0)}
+.sponsor-item svg{height:100%;width:auto}
+@keyframes sponsorScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.sponsors-wrapper{max-width:1200px;margin:0 auto;overflow:hidden;position:relative}
+.sponsors-wrapper::before,.sponsors-wrapper::after{content:'';position:absolute;top:0;width:120px;height:100%;z-index:2;pointer-events:none}
+.sponsors-wrapper::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}
+.sponsors-wrapper::after{right:0;background:linear-gradient(-90deg,var(--bg2),transparent)}
+.sponsor-title{text-align:center;margin-bottom:60px;font-family:'Orbitron',sans-serif;font-size:clamp(1.5rem,3vw,2.2rem)}
+
+/* FAQ */
+.faq{padding:100px 5%;position:relative}
+.faq-container{max-width:720px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer}
+.faq-question{display:flex;justify-content:space-between;align-items:center;font-family:'Orbitron',sans-serif;font-size:0.95rem;letter-spacing:0.5px;gap:16px}
+.faq-question .faq-icon{font-size:1.3rem;color:var(--neon);transition:var(--transition);flex-shrink:0}
+.faq-item.active .faq-icon{transform:rotate(45deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:var(--transition);color:var(--text2);font-size:0.9rem;line-height:1.8}
+.faq-item.active .faq-answer{max-height:300px;padding-top:16px}
+
+/* FOOTER */
+footer{position:relative;padding:80px 5% 30px;background:var(--bg);border-top:1px solid var(--border);overflow:hidden}
+footer::before{content:'';position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;max-width:1200px;margin:0 auto 60px}
+.footer-brand .nav-logo{margin-bottom:16px;display:inline-block}
+.footer-brand p{color:var(--text2);font-size:0.9rem;max-width:320px;line-height:1.8}
+.footer-heading{font-family:'Orbitron',sans-serif;font-size:0.8rem;letter-spacing:2px;margin-bottom:20px;color:var(--text)}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:12px}
+.footer-links a{color:var(--text2);font-size:0.85rem;transition:var(--transition);display:inline-flex;align-items:center;gap:6px}
+.footer-links a:hover{color:var(--neon);transform:translateX(4px)}
+.footer-social{display:flex;gap:12px;margin-top:20px}
+.footer-social a{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:var(--transition);color:var(--text2)}
+.footer-social a:hover{border-color:var(--neon);color:var(--neon);box-shadow:0 0 20px var(--neon-glow);transform:translateY(-3px)}
+.footer-bottom{padding-top:30px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1200px;margin:0 auto;font-size:0.8rem;color:var(--text2)}
+.footer-bottom a{color:var(--neon)}
+.footer-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:400px;height:200px;background:radial-gradient(ellipse at center,var(--neon-glow),transparent 70%);pointer-events:none;opacity:0.3}
+
+/* ANIMATIONS */
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in-left{opacity:0;transform:translateX(-40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-in-left.visible{opacity:1;transform:translateX(0)}
+.fade-in-right{opacity:0;transform:translateX(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-in-right.visible{opacity:1;transform:translateX(0)}
+.fade-in-scale{opacity:0;transform:scale(0.9);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-in-scale.visible{opacity:1;transform:scale(1)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.footer-grid{grid-template-columns:repeat(2,1fr)}
+.timeline-item-content{width:48%}
+}
+@media(max-width:768px){
+nav{padding:0 5%}
+.nav-links{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:rgba(10,10,10,0.98);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:var(--transition);z-index:999;border-left:1px solid var(--border)}
+.nav-links.active{right:0}
+.nav-toggle{display:flex;z-index:1000}
+.nav-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.nav-toggle.active span:nth-child(2){opacity:0}
+.nav-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+.stat-card{padding:24px 16px}
+.timeline-container::before{left:20px}
+.timeline-item,.timeline-item:nth-child(even){justify-content:flex-start}
+.timeline-item-content,.timeline-item:nth-child(even) .timeline-item-content{width:calc(100% - 50px);margin-left:50px}
+.timeline-item:nth-child(odd) .timeline-item-content::before,.timeline-item:nth-child(even) .timeline-item-content::before{left:-38px;right:auto}
+.footer-grid{grid-template-columns:1fr;gap:32px}
+.footer-bottom{flex-direction:column;text-align:center}
+.roster-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+}
+@media(max-width:480px){
+.stats-grid{grid-template-columns:1fr}
+.hero-btns{flex-direction:column;align-items:center}
+.hero-title{font-size:clamp(1.8rem,12vw,2.5rem)}
+.gallery-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+<div class="nav-logo">ALPHA<span>//</span></div>
+<ul class="nav-links" id="navLinks">
+<li><a href="#roster">Roster</a></li>
+<li><a href="#timeline">Timeline</a></li>
+<li><a href="#achievements">Achievements</a></li>
+<li><a href="#gallery">Gallery</a></li>
+<li><a href="#sponsors">Sponsors</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ul>
+<button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="hero">
+<canvas id="particle-canvas"></canvas>
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<div class="hero-badge">Est. 2024 // Division Alpha</div>
+<h1 class="hero-title">
+<span class="line">Dominate The</span>
+<span class="line">Arena</span>
+</h1>
+<p class="hero-sub">Where precision meets power. Alpha Esports forges champions through relentless grinding, tactical mastery, and unwavering discipline. Join the elite.</p>
+<div class="hero-btns">
+<a href="#roster" class="btn btn-primary">Meet The Team <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+<a href="#faq" class="btn btn-outline">Join Us</a>
+</div>
+</div>
+<div class="hero-scroll">
+<span>Scroll</span>
+<div class="hero-scroll-line"></div>
+</div>
+</section>
+
+<section class="stats">
+<div class="stats-grid">
+<div class="stat-card glass fade-in"><span class="stat-number" data-target="47">0</span><span class="stat-plus">+</span><span class="stat-label">Tournaments</span></div>
+<div class="stat-card glass fade-in"><span class="stat-number" data-target="28">0</span><span class="stat-plus">+</span><span class="stat-label">Trophies</span></div>
+<div class="stat-card glass fade-in"><span class="stat-number" data-target="15600">0</span><span class="stat-plus">+</span><span class="stat-label">Fans</span></div>
+<div class="stat-card glass fade-in"><span class="stat-number" data-target="12">0</span><span class="stat-plus">+</span><span class="stat-label">Pro Players</span></div>
+</div>
+</section>
+
+<section class="roster" id="roster">
+<h2 class="section-title">Elite <span class="neon-text">Roster</span></h2>
+<p class="section-sub">The warriors behind the legacy</p>
+<div class="roster-grid">
+<div class="roster-card fade-in-scale">
+<div class="roster-card-inner">
+<div class="roster-card-face glass">
+<div class="roster-card-bg" style="background:linear-gradient(135deg,#1a0a2e,#0a0a0a)"></div>
+<span class="roster-tag">#1</span>
+<span class="roster-role">Owner</span>
+<h3 class="roster-name">AlphaHarsh</h3>
+<p class="roster-desc">The visionary. Architect of the Alpha empire.</p>
+</div>
+</div>
+</div>
+<div class="roster-card fade-in-scale">
+<div class="roster-card-inner">
+<div class="roster-card-face glass">
+<div class="roster-card-bg" style="background:linear-gradient(135deg,#1a0a2e,#0a0a0a)"></div>
+<span class="roster-tag">#2</span>
+<span class="roster-role">Co-Owner</span>
+<h3 class="roster-name">AlphaYesh</h3>
+<p class="roster-desc">The strategist. Master of operations.</p>
+</div>
+</div>
+</div>
+<div class="roster-card fade-in-scale">
+<div class="roster-card-inner">
+<div class="roster-card-face glass">
+<div class="roster-card-bg" style="background:linear-gradient(135deg,#1a0a2e,#0a0a0a)"></div>
+<span class="roster-tag">GOTI</span>
+<span class="roster-role">Greatest of All Time</span>
+<h3 class="roster-name">Lritesh</h3>
+<p class="roster-desc">The legend. Unmatched skill, infinite aura.</p>
+</div>
+</div>
+</div>
+<div class="roster-card fade-in-scale">
+<div class="roster-card-inner">
+<div class="roster-card-face glass">
+<div class="roster-card-bg" style="background:linear-gradient(135deg,#1a0a2e,#0a0a0a)"></div>
+<span class="roster-tag">#ASS</span>
+<span class="roster-role">Assaulter</span>
+<h3 class="roster-name">Alpha_Mikey</h3>
+<p class="roster-desc">The predator. First in, last standing.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="timeline" id="timeline">
+<h2 class="section-title">Tournament <span class="neon-text">Timeline</span></h2>
+<p class="section-sub">The road to glory</p>
+<div class="timeline-container">
+<div class="timeline-item fade-in-left">
+<div class="timeline-item-content glass">
+<div class="timeline-date">MAR 2024</div>
+<h3 class="timeline-title">Alpha Rising #1</h3>
+<p class="timeline-desc">First official tournament. Secured top 3 and announced our arrival on the scene.</p>
+</div>
+</div>
+<div class="timeline-item fade-in-right">
+<div class="timeline-item-content glass">
+<div class="timeline-date">JUN 2024</div>
+<h3 class="timeline-title">Pro League S2</h3>
+<p class="timeline-desc">Dominant performance. 12 matches, 8 chicken dinners. Finished #1 overall.</p>
+</div>
+</div>
+<div class="timeline-item fade-in-left">
+<div class="timeline-item-content glass">
+<div class="timeline-date">SEP 2024</div>
+<h3 class="timeline-title">Global Invitational</h3>
+<p class="timeline-desc">Represented the region at the international stage. Top 16 finish worldwide.</p>
+</div>
+</div>
+<div class="timeline-item fade-in-right">
+<div class="timeline-item-content glass">
+<div class="timeline-date">DEC 2024</div>
+<h3 class="timeline-title">Alpha Championship</h3>
+<p class="timeline-desc">Hosted our own invitational. $50K prize pool. The esports ecosystem grows.</p>
+</div>
+</div>
+<div class="timeline-item fade-in-left">
+<div class="timeline-item-content glass">
+<div class="timeline-date">MAR 2025</div>
+<h3 class="timeline-title">World Cup Qualifiers</h3>
+<p class="timeline-desc">Secured the championship spot. Onward to global domination.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="achievements" id="achievements">
+<h2 class="section-title">Hall of <span class="neon-text">Fame</span></h2>
+<p class="section-sub">Trophies etched in the code of valor</p>
+<div class="achievements-grid">
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">🏆</div>
+<h3 class="achievement-title">Pro League Champions</h3>
+<p class="achievement-desc">Season 2 undefeated run with a 85% win rate across all maps.</p>
+</div>
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">🥇</div>
+<h3 class="achievement-title">Regional Dominance</h3>
+<p class="achievement-desc">3 consecutive regional titles. Unmatched consistency at the top.</p>
+</div>
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">💀</div>
+<h3 class="achievement-title">Most Eliminations</h3>
+<p class="achievement-desc">Record for most team eliminations in a single tournament season.</p>
+</div>
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">👑</div>
+<h3 class="achievement-title">MVP Award</h3>
+<p class="achievement-desc">Alpha_Mikey awarded MVP at the Global Invitational 2024.</p>
+</div>
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">🔥</div>
+<h3 class="achievement-title">Fan Favorite</h3>
+<p class="achievement-desc">Voted #1 esports organization by the community two years running.</p>
+</div>
+<div class="achievement-card glass fade-in"><div class="achievement-glow"></div>
+<div class="achievement-icon">🌍</div>
+<h3 class="achievement-title">Global Recognition</h3>
+<p class="achievement-desc">Featured in top esports publications worldwide. The world knows Alpha.</p>
+</div>
+</div>
+</section>
+
+<section class="gallery" id="gallery">
+<h2 class="section-title">Epic <span class="neon-text">Moments</span></h2>
+<p class="section-sub">Frozen in time, forever in glory</p>
+<div class="gallery-grid">
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#1a0a2e,#2d1b4e);display:flex;align-items:center;justify-content:center;font-size:3rem">🏟️</div>
+<div class="gallery-overlay"><span>Grand Finals Arena</span></div>
+</div>
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a1a2e,#1b3d4e);display:flex;align-items:center;justify-content:center;font-size:3rem">🎮</div>
+<div class="gallery-overlay"><span>Bootcamp Setup</span></div>
+</div>
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#2e1a0a,#4e2d1b);display:flex;align-items:center;justify-content:center;font-size:3rem">🏆</div>
+<div class="gallery-overlay"><span>Championship Moment</span></div>
+</div>
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a2e1a,#1b4e2d);display:flex;align-items:center;justify-content:center;font-size:3rem">👥</div>
+<div class="gallery-overlay"><span>Team Huddle</span></div>
+</div>
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#2e0a1a,#4e1b2d);display:flex;align-items:center;justify-content:center;font-size:3rem">🎤</div>
+<div class="gallery-overlay"><span>Interview Session</span></div>
+</div>
+<div class="gallery-item fade-in">
+<div style="width:100%;height:100%;background:linear-gradient(135deg,#1a2e0a,#2d4e1b);display:flex;align-items:center;justify-content:center;font-size:3rem">📸</div>
+<div class="gallery-overlay"><span>Press Conference</span></div>
+</div>
+</div>
+</section>
+
+<section class="sponsors" id="sponsors">
+<h2 class="sponsor-title">Trusted By <span class="neon-text">Legends</span></h2>
+<div class="sponsors-wrapper">
+<div class="sponsors-track" id="sponsorsTrack">
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">NEO</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">RAZE</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">VOID</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">XTRM</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">CYBER</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">PULSE</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">NEO</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">RAZE</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">VOID</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">XTRM</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">CYBER</text></svg>
+<svg class="sponsor-item" viewBox="0 0 120 40" fill="none"><rect width="120" height="40" rx="4" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><text x="60" y="25" text-anchor="middle" fill="currentColor" font-family="Orbitron" font-size="11" letter-spacing="1">PULSE</text></svg>
+</div>
+</div>
+</section>
+
+<section class="faq" id="faq">
+<h2 class="section-title">Frequently <span class="neon-text">Asked</span></h2>
+<p class="section-sub">Everything you need to know</p>
+<div class="faq-container">
+<div class="faq-item active">
+<div class="faq-question"><span>How do I join Alpha Esports?</span><span class="faq-icon">+</span></div>
+<div class="faq-answer">We hold open trials every quarter. Follow us on social media for announcements. You'll need to be in the top tier of the ranked leaderboard and pass our bootcamp evaluation.</div>
+</div>
+<div class="faq-item">
+<div class="faq-question"><span>Does Alpha provide gaming gear?</span><span class="faq-icon">+</span></div>
+<div class="faq-answer">Yes, all our pro players receive sponsor-provided peripherals, custom jerseys, and access to our state-of-the-art gaming facility equipped with high-end PCs and streaming setups.</div>
+</div>
+<div class="faq-item">
+<div class="faq-question"><span>Can brands partner with Alpha?</span><span class="faq-icon">+</span></div>
+<div class="faq-answer">Absolutely. We offer sponsorship packages across multiple tiers. Reach out to our partnerships team at partners@alphaesports.gg for custom proposals.</div>
+</div>
+<div class="faq-item">
+<div class="faq-question"><span>What games does Alpha compete in?</span><span class="faq-icon">+</span></div>
+<div class="faq-answer">We currently field rosters in BGMI, Valorant, and Call of Duty Mobile. We're scouting for fighting games and CS2 for the upcoming season.</div>
+</div>
+<div class="faq-item">
+<div class="faq-question"><span>How can I watch Alpha matches?</span><span class="faq-icon">+</span></div>
+<div class="faq-answer">All our matches are streamed live on our YouTube and Twitch channels. Match schedules are posted on our Discord server and social media handles.</div>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="#" class="nav-logo">ALPHA<span>//</span></a>
+<p>Forged in competition. Driven by passion. Alpha Esports is where the elite compete and legends are born. Join the revolution.</p>
+<div class="footer-social">
+<a href="#" aria-label="YouTube"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.94 2C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg></a>
+<a href="#" aria-label="Twitter/X"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16zM4 20l6.768 -6.768M19.5 4l-6.768 6.768"/></svg></a>
+<a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+<a href="#" aria-label="Discord"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M9 9s1.5-1 3-1 3 1 3 1"/></svg></a>
+</div>
+</div>
+<div>
+<h4 class="footer-heading">Quick Links</h4>
+<ul class="footer-links">
+<li><a href="#roster">Roster</a></li>
+<li><a href="#timeline">Tournaments</a></li>
+<li><a href="#achievements">Achievements</a></li>
+<li><a href="#gallery">Gallery</a></li>
+<li><a href="#sponsors">Sponsors</a></li>
+</ul>
+</div>
+<div>
+<h4 class="footer-heading">Support</h4>
+<ul class="footer-links">
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#">Contact Us</a></li>
+<li><a href="#">Privacy Policy</a></li>
+<li><a href="#">Terms of Service</a></li>
+</ul>
+</div>
+<div>
+<h4 class="footer-heading">Contact</h4>
+<ul class="footer-links">
+<li><a href="mailto:contact@alphaesports.gg">contact@alphaesports.gg</a></li>
+<li><a href="#">Discord: /alphaesports</a></li>
+<li><a href="#">Twitter: @alphaesports</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<span>&copy; 2025 <a href="#">Alpha Esports</a>. All rights reserved.</span>
+<span>Crafted with precision // <span class="neon-text">GG</span></span>
+</div>
+<div class="footer-glow"></div>
+</footer>
+
+<script>
+// Particle Animation
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let mouseX = 0, mouseY = 0;
+
+function resizeCanvas() {
+canvas.width = canvas.offsetWidth;
+canvas.height = canvas.offsetHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle {
+constructor() { this.reset() }
+reset() {
+this.x = Math.random() * canvas.width;
+this.y = Math.random() * canvas.height;
+this.size = Math.random() * 2 + 0.5;
+this.speedX = (Math.random() - 0.5) * 0.6;
+this.speedY = (Math.random() - 0.5) * 0.6;
+this.opacity = Math.random() * 0.4 + 0.2;
+this.hue = 270 + Math.random() * 20;
+}
+update() {
+this.x += this.speedX;
+this.y += this.speedY;
+if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+}
+draw() {
+ctx.beginPath();
+ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+ctx.fillStyle = `rgba(180,78,255,${this.opacity})`;
+ctx.fill();
+}
+}
+
+function initParticles(count) {
+particles = Array.from({length: count}, () => new Particle());
+}
+
+function drawConnections() {
+for (let i = 0; i < particles.length; i++) {
+for (let j = i + 1; j < particles.length; j++) {
+const dx = particles[i].x - particles[j].x;
+const dy = particles[i].y - particles[j].y;
+const dist = Math.sqrt(dx * dx + dy * dy);
+if (dist < 150) {
+const opacity = (1 - dist / 150) * 0.15;
+ctx.beginPath();
+ctx.moveTo(particles[i].x, particles[i].y);
+ctx.lineTo(particles[j].x, particles[j].y);
+ctx.strokeStyle = `rgba(180,78,255,${opacity})`;
+ctx.lineWidth = 0.5;
+ctx.stroke();
+}
+}
+}
+}
+
+function animateParticles() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+particles.forEach(p => { p.update(); p.draw() });
+drawConnections();
+requestAnimationFrame(animateParticles);
+}
+
+initParticles(80);
+animateParticles();
+
+// Nav scroll
+const navbar = document.getElementById('navbar');
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+const currentScroll = window.pageYOffset;
+navbar.classList.toggle('scrolled', currentScroll > 50);
+lastScroll = currentScroll;
+}, { passive: true });
+
+// Mobile nav toggle
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+const navLinkItems = navLinks.querySelectorAll('a');
+
+navToggle.addEventListener('click', () => {
+navToggle.classList.toggle('active');
+navLinks.classList.toggle('active');
+});
+
+navLinkItems.forEach(link => {
+link.addEventListener('click', () => {
+navToggle.classList.remove('active');
+navLinks.classList.remove('active');
+});
+});
+
+// Counter animation
+function animateCounters() {
+const counters = document.querySelectorAll('.stat-number');
+counters.forEach(counter => {
+const target = parseInt(counter.getAttribute('data-target'));
+const duration = 2000;
+const startTime = performance.now();
+
+function updateCounter(currentTime) {
+const elapsed = currentTime - startTime;
+const progress = Math.min(elapsed / duration, 1);
+const eased = 1 - Math.pow(1 - progress, 3);
+const current = Math.floor(eased * target);
+counter.textContent = current.toLocaleString();
+if (progress < 1) requestAnimationFrame(updateCounter);
+else counter.textContent = target.toLocaleString();
+}
+requestAnimationFrame(updateCounter);
+});
+}
+
+// Intersection Observer for scroll animations
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+if (entry.target.classList.contains('stat-card')) {
+animateCounters();
+}
+entry.target.classList.add('visible');
+}
+});
+}, observerOptions);
+
+document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .fade-in-scale').forEach(el => observer.observe(el));
+
+// FAQ Accordion
+document.querySelectorAll('.faq-item').forEach(item => {
+item.querySelector('.faq-question').addEventListener('click', () => {
+const wasActive = item.classList.contains('active');
+document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+if (!wasActive) item.classList.add('active');
+});
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function(e) {
+const href = this.getAttribute('href');
+if (href === '#') return;
+e.preventDefault();
+const target = document.querySelector(href);
+if (target) {
+target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+});
+});
+
+// Sponsor carousel pause on hover
+const sponsorsTrack = document.getElementById('sponsorsTrack');
+if (sponsorsTrack) {
+sponsorsTrack.addEventListener('mouseenter', () => sponsorsTrack.style.animationPlayState = 'paused');
+sponsorsTrack.addEventListener('mouseleave', () => sponsorsTrack.style.animationPlayState = 'running');
+}
+</script>
+</body>
+</html>

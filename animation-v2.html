@@ -1,0 +1,329 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Marvel vs DC â€” Animated Battle</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;overflow:hidden;font-family:'Orbitron',sans-serif}
+canvas{position:fixed;top:0;left:0;width:100vw;height:100vh}
+.hud{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;color:rgba(255,255,255,0.15);font-size:0.55rem;letter-spacing:4px;text-transform:uppercase;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">âœ¦ AUTO-PLAY ANIMATION âœ¦</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,T=0,pts=[];
+function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+window.addEventListener('resize',resize);resize();
+
+// Stars
+for(let i=0;i<300;i++)pts.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.5+0.5,o:Math.random()*0.5+0.2});
+
+// Buildings
+let bld=[];
+function genBld(){
+bld=[];const n=25+Math.floor(Math.random()*15);
+for(let i=0;i<n;i++){const bw=25+Math.random()*55,bh=60+Math.random()*280,bx=(W/n)*i*1.3;bld.push({x:bx,w:bw,h:bh,wins:Array.from({length:Math.ceil(bh/28)},()=>({on:Math.random()>0.4,lit:Math.random()>0.5}))})}
+}
+genBld();
+
+// Particles
+let parts=[];
+function spawnP(x,y,c,clr,sp,l){for(let i=0;i<c;i++)parts.push({x,y,vx:(Math.random()-0.5)*sp,vy:(Math.random()-0.5)*sp,l:L=l||40,mL:l||40,sz:Math.random()*3+1,cl:clr||'#ff6633'})}
+
+// === DRAW IRON MAN (Mark III style) ===
+function drawIronMan(x,y,s,angle){
+ctx.save();ctx.translate(x,y);ctx.rotate(angle||0);
+const g=s*0.05;
+// Gold legs
+ctx.fillStyle='#c8a020';
+ctx.fillRect(-s*0.2,s*0.5,s*0.4,s*0.4);
+ctx.fillStyle='#8b0000';
+ctx.fillRect(-s*0.25,s*0.3,s*0.5,s*0.25);
+// Boots
+ctx.fillStyle='#c8a020';
+ctx.fillRect(-s*0.25,s*0.75,s*0.2,s*0.2);
+ctx.fillRect(s*0.05,s*0.75,s*0.2,s*0.2);
+// Body (red armor)
+const bg=ctx.createLinearGradient(0,-s*0.3,0,s*0.5);
+bg.addColorStop(0,'#cc2200');bg.addColorStop(0.5,'#aa1100');bg.addColorStop(1,'#880000');
+ctx.fillStyle=bg;
+ctx.beginPath();ctx.moveTo(-s*0.4,-s*0.3);ctx.lineTo(s*0.4,-s*0.3);ctx.lineTo(s*0.45,s*0.5);ctx.lineTo(-s*0.45,s*0.5);ctx.closePath();ctx.fill();
+// Gold chest
+ctx.fillStyle='#c8a020';
+ctx.fillRect(-s*0.15,-s*0.1,s*0.3,s*0.25);
+// Arc Reactor (bright circle)
+const ar=ctx.createRadialGradient(0,-s*0.05,0,0,-s*0.05,s*0.15);
+ar.addColorStop(0,'#ffffff');ar.addColorStop(0.3,'#00ddff');ar.addColorStop(0.7,'#0066cc');ar.addColorStop(1,'#002244');
+ctx.fillStyle=ar;
+ctx.beginPath();ctx.arc(0,-s*0.05,s*0.15,0,Math.PI*2);ctx.fill();
+// Reactor glow
+ctx.shadowColor='#00ddff';ctx.shadowBlur=s*0.5;
+ctx.fillStyle='rgba(0,200,255,0.15)';
+ctx.beginPath();ctx.arc(0,-s*0.05,s*0.3,0,Math.PI*2);ctx.fill();
+ctx.shadowBlur=0;
+// Shoulders
+ctx.fillStyle='#c8a020';
+ctx.beginPath();ctx.arc(-s*0.35,-s*0.35,s*0.12,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.arc(s*0.35,-s*0.35,s*0.12,0,Math.PI*2);ctx.fill();
+// Arms
+ctx.fillStyle='#cc2200';
+ctx.fillRect(-s*0.48,-s*0.2,s*0.12,s*0.4);
+ctx.fillRect(s*0.36,-s*0.2,s*0.12,s*0.4);
+// Repulsors (glowing hands)
+const rp=ctx.createRadialGradient(-s*0.48,s*0.15,0,-s*0.48,s*0.15,s*0.12);
+rp.addColorStop(0,'rgba(255,255,255,0.9)');rp.addColorStop(0.5,'rgba(0,200,255,0.4)');rp.addColorStop(1,'rgba(0,200,255,0)');
+ctx.fillStyle=rp;ctx.beginPath();ctx.arc(-s*0.48,s*0.15,s*0.12,0,Math.PI*2);ctx.fill();
+const rp2=ctx.createRadialGradient(s*0.48,s*0.15,0,s*0.48,s*0.15,s*0.12);
+rp2.addColorStop(0,'rgba(255,255,255,0.9)');rp2.addColorStop(0.5,'rgba(0,200,255,0.4)');rp2.addColorStop(1,'rgba(0,200,255,0)');
+ctx.fillStyle=rp2;ctx.beginPath();ctx.arc(s*0.48,s*0.15,s*0.12,0,Math.PI*2);ctx.fill();
+// Helmet
+ctx.fillStyle='#cc2200';
+ctx.beginPath();ctx.arc(0,-s*0.48,s*0.3,0,Math.PI*2);ctx.fill();
+// Faceplate (gold)
+ctx.fillStyle='#c8a020';
+ctx.beginPath();ctx.ellipse(0,-s*0.48,s*0.22,s*0.2,0,0,Math.PI*2);ctx.fill();
+// Eyes (white glow)
+ctx.fillStyle='#ffffff';
+ctx.shadowColor='#ffffff';ctx.shadowBlur=8;
+ctx.fillRect(-s*0.13,-s*0.52,s*0.06,s*0.03);
+ctx.fillRect(s*0.07,-s*0.52,s*0.06,s*0.03);
+ctx.shadowBlur=0;
+// Mouth slit
+ctx.fillStyle='#220000';
+ctx.fillRect(-s*0.08,-s*0.45,s*0.16,s*0.02);
+// Unibeam glow (chest shot effect)
+if(Math.sin(T*0.05)>0.7){
+ctx.shadowColor='#00ddff';ctx.shadowBlur=20;
+ctx.fillStyle='rgba(0,200,255,0.2)';
+ctx.beginPath();ctx.arc(0,-s*0.05,s*0.4,0,Math.PI*2);ctx.fill();
+ctx.shadowBlur=0;
+}
+ctx.restore();
+}
+
+// === DRAW MIA (realistic styled character) ===
+function drawMia(x,y,s){
+ctx.save();ctx.translate(x,y);
+const b=Math.sin(T*0.005)*s*0.08;
+// Hair (long, dark)
+ctx.fillStyle='#1a0a05';
+ctx.beginPath();ctx.ellipse(0,-s*0.75+b,s*0.6,s*0.5,0,0,Math.PI*2);ctx.fill();
+// Hair sides
+ctx.beginPath();ctx.ellipse(-s*0.5,-s*0.55+b,s*0.2,s*0.45,0.2,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.ellipse(s*0.5,-s*0.55+b,s*0.2,s*0.45,-0.2,0,Math.PI*2);ctx.fill();
+// Hair down
+ctx.fillStyle='#1a0a05';
+ctx.beginPath();ctx.moveTo(-s*0.4,s*0.1+b);ctx.quadraticCurveTo(-s*0.6,s*0.5+b,-s*0.3,s*0.7+b);
+ctx.quadraticCurveTo(0,s*0.8+b,s*0.3,s*0.7+b);
+ctx.quadraticCurveTo(s*0.6,s*0.5+b,s*0.4,s*0.1+b);ctx.fill();
+// Face
+const fg=ctx.createRadialGradient(0,-s*0.68+b,0,0,-s*0.68+b,s*0.3);
+fg.addColorStop(0,'#f0d0b8');fg.addColorStop(0.7,'#e0b898');fg.addColorStop(1,'#d0a888');
+ctx.fillStyle=fg;
+ctx.beginPath();ctx.arc(0,-s*0.68+b,s*0.32,0,Math.PI*2);ctx.fill();
+// Eyebrows
+ctx.strokeStyle='#2a1a10';ctx.lineWidth=1.5;
+ctx.beginPath();ctx.moveTo(-s*0.12,-s*0.75+b);ctx.lineTo(-s*0.04,-s*0.77+b);ctx.stroke();
+ctx.beginPath();ctx.moveTo(s*0.12,-s*0.75+b);ctx.lineTo(s*0.04,-s*0.77+b);ctx.stroke();
+// Eyes
+ctx.fillStyle='#3a2a1a';
+ctx.beginPath();ctx.ellipse(-s*0.1,-s*0.7+b,s*0.05,s*0.04,0,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.ellipse(s*0.1,-s*0.7+b,s*0.05,s*0.04,0,0,Math.PI*2);ctx.fill();
+// Eye shine
+ctx.fillStyle='#fff';
+ctx.beginPath();ctx.arc(-s*0.08,-s*0.71+b,s*0.015,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.arc(s*0.12,-s*0.71+b,s*0.015,0,Math.PI*2);ctx.fill();
+// Nose
+ctx.strokeStyle='#d0a888';ctx.lineWidth=0.5;
+ctx.beginPath();ctx.moveTo(0,-s*0.65+b);ctx.lineTo(0,-s*0.6+b);ctx.stroke();
+// Lips
+ctx.fillStyle='#cc4466';
+ctx.beginPath();ctx.ellipse(0,-s*0.6+b,s*0.09,s*0.035,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#dd5577';
+ctx.beginPath();ctx.ellipse(0,-s*0.605+b,s*0.07,s*0.02,0,0,Math.PI*2);ctx.fill();
+// Body / dress
+const db=Math.sin(T*0.003)*s*0.06;
+const dg=ctx.createLinearGradient(0,-s*0.38,0,s*0.9);
+dg.addColorStop(0,'#ff2244');dg.addColorStop(0.4,'#cc0033');dg.addColorStop(0.8,'#990022');dg.addColorStop(1,'#660011');
+ctx.fillStyle=dg;
+ctx.beginPath();
+ctx.moveTo(-s*0.32,-s*0.38+db);
+ctx.quadraticCurveTo(0,s*0.15+db,s*0.32,-s*0.38+db);
+ctx.quadraticCurveTo(s*0.42,s*0.7+db,0,s*1.0+db);
+ctx.quadraticCurveTo(-s*0.42,s*0.7+db,-s*0.32,-s*0.38+db);
+ctx.fill();
+// Neck
+ctx.fillStyle='#e8c4a8';
+ctx.fillRect(-s*0.08,-s*0.38+b,s*0.16,s*0.1);
+// Arms
+ctx.fillStyle='#e8c4a8';
+ctx.save();ctx.translate(-s*0.32,s*0.05+db);ctx.rotate(Math.sin(T*0.004)*0.3);
+ctx.fillRect(-s*0.05,0,s*0.1,s*0.3);ctx.restore();
+ctx.save();ctx.translate(s*0.32,s*0.05+db);ctx.rotate(-Math.sin(T*0.004)*0.3);
+ctx.fillRect(-s*0.05,0,s*0.1,s*0.3);ctx.restore();
+// Glow aura
+const ag=ctx.createRadialGradient(0,s*0.2,0,0,s*0.2,s*1.3);
+ag.addColorStop(0,'rgba(255,51,102,0.12)');ag.addColorStop(1,'rgba(255,51,102,0)');
+ctx.fillStyle=ag;ctx.beginPath();ctx.arc(0,s*0.2,s*1.3,0,Math.PI*2);ctx.fill();
+ctx.restore();
+}
+
+// === DRAW IRON MAN FLYING (alternate pose) ===
+function drawIronManFlying(x,y,s,angle){
+ctx.save();ctx.translate(x,y);ctx.rotate(angle||0);
+// Jet trail
+const jt=ctx.createRadialGradient(0,s*0.8,0,0,s*0.8,s*0.5);
+jt.addColorStop(0,'rgba(255,200,100,0.6)');jt.addColorStop(0.5,'rgba(255,100,0,0.3)');jt.addColorStop(1,'rgba(255,50,0,0)');
+ctx.fillStyle=jt;ctx.beginPath();ctx.ellipse(0,s*0.8,s*0.2,s*0.5,0,0,Math.PI*2);ctx.fill();
+// Body
+const bg=ctx.createLinearGradient(0,-s*0.5,0,s*0.5);
+bg.addColorStop(0,'#dd2200');bg.addColorStop(0.5,'#bb1100');bg.addColorStop(1,'#990000');
+ctx.fillStyle=bg;
+ctx.beginPath();ctx.ellipse(0,0,s*0.3,s*0.5,0,0,Math.PI*2);ctx.fill();
+// Helmet
+ctx.fillStyle='#dd2200';
+ctx.beginPath();ctx.arc(0,-s*0.5,s*0.25,0,Math.PI*2);ctx.fill();
+// Faceplate
+ctx.fillStyle='#c8a020';
+ctx.beginPath();ctx.ellipse(0,-s*0.5,s*0.18,s*0.16,0,0,Math.PI*2);ctx.fill();
+// Eyes
+ctx.fillStyle='#fff';ctx.shadowColor='#0ff';ctx.shadowBlur=6;
+ctx.fillRect(-s*0.1,-s*0.53,s*0.05,s*0.025);
+ctx.fillRect(s*0.05,-s*0.53,s*0.05,s*0.025);
+ctx.shadowBlur=0;
+// Arc Reactor
+const ar2=ctx.createRadialGradient(0,0,0,0,0,s*0.14);
+ar2.addColorStop(0,'#fff');ar2.addColorStop(0.3,'#0df');ar2.addColorStop(0.7,'#06c');ar2.addColorStop(1,'#024');
+ctx.fillStyle=ar2;ctx.beginPath();ctx.arc(0,0,s*0.14,0,Math.PI*2);ctx.fill();
+// Arms out (flying pose)
+ctx.fillStyle='#dd2200';
+ctx.save();ctx.translate(-s*0.45,-s*0.1);ctx.rotate(-0.4);
+ctx.fillRect(-s*0.04,-s*0.02,s*0.08,s*0.35);ctx.restore();
+ctx.save();ctx.translate(s*0.45,-s*0.1);ctx.rotate(0.4);
+ctx.fillRect(-s*0.04,-s*0.02,s*0.08,s*0.35);ctx.restore();
+ctx.restore();
+}
+
+// === DRAW CITY BACKGROUND (detailed) ===
+function drawCity(){
+const cx=ctx;
+bld.forEach(b=>{
+const bh=b.h,bw=b.w,bx=b.x;
+// Building
+const cg=cx.createLinearGradient(bx,0,bx,1);
+cg.addColorStop(0,'rgba(15,15,35,0.85)');cg.addColorStop(1,'rgba(8,8,18,0.95)');
+cx.fillStyle=cg;cx.fillRect(bx,H-bh,bw,bh);
+// Outline
+cx.strokeStyle='rgba(80,80,180,0.06)';cx.lineWidth=0.5;cx.strokeRect(bx,H-bh,bw,bh);
+// Windows
+b.wins.forEach((w,wi)=>{
+if(!w.on)return;
+const ww=4+Math.random()*4,wh=4+Math.random()*4;
+const wx=bx+3+Math.random()*(bw-6-ww);
+const wy=H-bh+5+wi*28+Math.random()*5;
+const lit=Math.sin(T*0.002+wx*wy)>-0.3;
+if(lit){
+const wc=Math.random()>0.85?'#ff8844':'#ffeecc';
+cx.fillStyle=wc;cx.shadowColor=wc;cx.shadowBlur=3;
+cx.fillRect(wx,wy,ww,wh);
+cx.shadowBlur=0;
+}
+});
+});
+// Ground line
+const gg=cx.createLinearGradient(0,H-3,0,H);
+gg.addColorStop(0,'rgba(60,30,100,0.15)');gg.addColorStop(1,'rgba(10,10,25,0.3)');
+cx.fillStyle=gg;cx.fillRect(0,H-3,W,3);
+}
+
+// === DRAW MOON ===
+function drawMoon(){
+const mx=W*0.85,my=H*0.08;
+const mg=ctx.createRadialGradient(mx,my,0,mx,my,55);
+mg.addColorStop(0,'rgba(200,210,255,0.3)');mg.addColorStop(0.5,'rgba(150,160,220,0.1)');mg.addColorStop(1,'rgba(100,100,180,0)');
+ctx.fillStyle=mg;ctx.beginPath();ctx.arc(mx,my,55,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='rgba(200,210,255,0.06)';ctx.beginPath();ctx.arc(mx,my,28,0,Math.PI*2);ctx.fill();
+}
+
+// === MAIN LOOP ===
+let iron1={},iron2={},mia={};
+function initChars(){
+iron1={x:W*0.25,y:H*0.25,vx:0.6,vy:0.3};
+iron2={x:W*0.7,y:H*0.2,vx:-0.5,vy:0.2};
+mia={x:W*0.5,y:H*0.6};
+}
+initChars();
+
+function update(){
+T++;
+// Iron Man 1 - swooping
+iron1.x+=iron1.vx;iron1.y+=iron1.vy+Math.sin(T*0.02)*0.3;
+iron1.vy+=0.002;
+if(iron1.x>W*0.6||iron1.x<W*0.1)iron1.vx*=-1;
+if(iron1.y>H*0.4){iron1.vy=-0.4}
+if(iron1.y<H*0.1)iron1.vy=0.2;
+if(T%4===0)spawnP(iron1.x+Math.random()*6-3,iron1.y+12+Math.random()*8,1,'rgba(255,200,50,0.5)',2,12);
+// Iron Man 2 - diving
+iron2.x+=iron2.vx;iron2.y+=iron2.vy;
+iron2.vy+=0.008;
+if(iron2.x>W*0.85||iron2.x<W*0.15)iron2.vx*=-1;
+if(iron2.y>H*0.35)iron2.vy=-0.3;
+// Mia - standing, slight sway
+mia.y=H*0.65+Math.sin(T*0.003)*3;
+// Random explosions
+if(T%150===0&&Math.random()>0.5){
+const ex=W*0.1+Math.random()*W*0.8,ey=H*0.1+Math.random()*H*0.4;
+spawnP(ex,ey,25,'#ff6633',7,35);
+spawnP(ex,ey,15,'#ffcc00',5,25);
+}
+// Update particles
+parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;p.vx*=0.96;p.vy*=0.96;p.sz*=0.98});
+parts=parts.filter(p=>p.life>0);
+}
+
+function draw(){
+// Clear with trail
+ctx.fillStyle='rgba(10,10,18,0.3)';ctx.fillRect(0,0,W,H);
+// Stars
+pts.forEach(s=>{
+ctx.fillStyle='rgba(255,255,255,'+s.o+')';
+ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,Math.PI*2);ctx.fill();
+if(Math.random()>0.995){ctx.fillStyle='rgba(200,200,255,0.2)';ctx.beginPath();ctx.arc(s.x,s.y,s.s*4,0,Math.PI*2);ctx.fill()}
+});
+drawMoon();
+drawCity();
+// Draw characters
+drawIronManFlying(iron1.x,iron1.y,18,Math.atan2(iron1.vy,iron1.vx));
+drawIronManFlying(iron2.x,iron2.y,15,Math.atan2(iron2.vy,iron2.vx));
+drawMia(mia.x,mia.y,30);
+// Particles
+parts.forEach(p=>{
+const pg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.sz*(p.life/p.mL+0.1));
+pg.addColorStop(0,'rgba(255,255,200,'+(p.life/p.mL*0.8)+')');
+pg.addColorStop(0.5,'rgba(255,150,50,'+(p.life/p.mL*0.4)+')');
+pg.addColorStop(1,'rgba(255,50,0,0)');
+ctx.fillStyle=pg;
+ctx.beginPath();ctx.arc(p.x,p.y,Math.max(0.3,p.sz*(p.life/p.mL+0.1)),0,Math.PI*2);ctx.fill();
+});
+// Vignette
+const vg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.65);
+vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(0.6,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.5)');
+ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+// Scan line
+ctx.fillStyle='rgba(0,200,255,0.008)';ctx.fillRect(0,(T%180)/180*H,W,1.5);
+requestAnimationFrame(draw);
+}
+
+function loop(){update();draw()}
+loop();
+
+window.addEventListener('resize',()=>{resize();pts=[];for(let i=0;i<300;i++)pts.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.5+0.5,o:Math.random()*0.5+0.2});genBld();initChars()});
+</script>
+</body>
+</html>
